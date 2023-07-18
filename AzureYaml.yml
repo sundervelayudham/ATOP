@@ -1,0 +1,30 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+jobs:
+  - job: TestSuiteExecution
+  
+trigger:
+    - dev
+
+pool:
+    vmImage: "ubuntu-latest"
+
+variables:
+   imageName: $(pwd) -replace '/JavaCABuild', ''
+
+   steps:
+    - script: |
+         curl -X POST "http://34.206.31.192:8282/talos/external/executeTestSet" -H "accept: */*" -H "apiKey: 2cff6e67-d459-46c1-80c1-e8784ef4d4a4" -H "secretKey: 61f59437-0dad-4e4e-b95c-e3ca665db06b" -H "Content-Type: application/json" -d "{ \"loggedUserName\": \"Admin\", \"maxNumberOfThreads\": 2, \"testSetId\": 398, \"triggeredFromApp\": \"Azure_DevOps\"}"
+      displayName: "Run a multi-line script"
+
+    - task: octane-start-task@2
+      inputs:
+        OctaneServiceConnection: "TALOS_Octane_Execution"
+        WorkspaceList: "1002"
+
+    - task: octane-end-task@2
+      inputs:
+        OctaneServiceConnection: "TALOS_Octane_Execution"
+        WorkspaceList: "1002"
